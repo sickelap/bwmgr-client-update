@@ -1,0 +1,17 @@
+
+Interface em1 (RUNNING Gigabit License Level:30)
+Buffers:0/8/25000 
+Drops:5820 BW IndexLevel:2 FW IndexLevel:2
+Bridging:Enabled Forwarding:NOBCAST ALL PROTS Group:0 
+Streams:0/0/10000
+Outside 
+--------------------------------------------------------------------
+100 addr:10.0.0.0/255.255.255.0 priority:pass-thru (0/0) <IN OUT>
+101 addr:10.0.1.0/255.255.255.224 priority:pass-thru (0/0) <IN OUT>
+10008 addr:10.0.0.1/255.255.255.255 maddr:00:00:00:00:00:01 BW-OUT:100000000bps BW-IN:100000000bps (0/0) <IN OUT>
+10008 addr:10.0.0.2/255.255.255.255 maddr:00:00:00:00:00:02 BW-OUT:100000000bps BW-IN:100000000bps (0/0) <IN OUT>
+10009 addr:10.0.0.3/255.255.255.255 maddr:00:00:00:00:00:03 BW-OUT:500000000bps BW-IN:100000000bps (0/0) <IN OUT>
+10002 addr:10.0.0.5/255.255.255.255 maddr:00:00:00:00:00:05 BW-OUT:100000000bps BW-IN:100000000bps (0/0) <IN OUT>
+10003 addr:10.0.0.8/255.255.255.255 maddr:00:00:00:00:00:08 BW-OUT:100000000bps BW-IN:100000000bps (0/0) <IN OUT>
+10004 addr:10.0.0.9/255.255.255.255 maddr:00:00:00:00:00:09 BW-OUT:500000000bps BW-IN:200000000bps (0/0) <IN OUT>
+999999 <G> BW-BOTH:960bps (1014/0) <IN OUT>

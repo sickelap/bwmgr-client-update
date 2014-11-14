@@ -1,0 +1,2 @@
+-x 100 -addr 10.0.0.0 -addrmsk 255.255.255.0 -priority pass-thru
+-x 101 -addr 10.0.1.0 -addrmsk 255.255.255.224 -priority pass-thru

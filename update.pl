@@ -10,13 +10,15 @@ GetOptions(
   "id=s" => \$arg_id,
   "verbose" => \$arg_verbose,
   "noexec" => \$arg_noexec,
-  "last:s" => \$arg_last
+  "last:s" => \$arg_last,
+  "default:s" => \$args_default,
+  "final:s" => \$args_final
 );
 
 die(<<EOM
 KLAIDA!
 
-$0 --id=<filialo id> --if=<interfeisas> [--mac] [--inet] [--noexec] [--verbose] [--last=<index>[:<bwboth>]]
+$0 --id=<filialo id> --if=<interfeisas> [--mac] [--inet] [--noexec] [--verbose] [--last=<index>[:<bwboth>]] --default=<file> --final=<file>
 
  --mac      - filtruoti pagal MAC adresa
  --inet	    - naudoti tarptautinio srauto greicio konfiguracija (default: LT)
@@ -30,7 +32,8 @@ die("blogas formatas: --last=<index>[:<bwboth>]\n") if ($arg_last and $arg_last 
 
 my $bwmgr = BWMGR->new(
   IFACE => $arg_if,
-  RULES => "/etc/bwmgr.default",
+  DEFAULT_RULES => $args_default,
+  FINAL_RULES => $args_final,
   ID => $arg_id,
   MAC => $arg_mac,
   INET => $arg_inet,

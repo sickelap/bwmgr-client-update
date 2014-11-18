@@ -7,7 +7,8 @@ sub new {
   my ($class, %params) = @_;
   my $self = {};
   $self->{CMD} = $params{CMD} || "/usr/bwmgr/utils/bwmgr";
-  $self->{RULES} = $params{RULES} || undef;
+  $self->{DEFAULT_RULES} = $params{DEFAULT_RULES} && -f $params{DEFAULT_RULES} || "/etc/bwmgr.default";
+  $self->{FINAL_RULES} = $params{FINAL_RULES} && -f $params{FINAL_RULES} || "/etc/bwmgr.final";
   $self->{IFACE} = $params{IFACE} || undef;
   $self->{VERBOSE} = $params{VERBOSE} || undef;
   $self->{NOEXEC} = $params{NOEXEC} || undef;
@@ -42,8 +43,12 @@ my %bwmgr_matchers = (
 sub run {
   my ($self) = @_;
 
+  my $config_rules = $self->load_config_rules($self->{DEFAULT_RULES});
+  foreach my $default_rule (@$config_rules) {
+    $self->add_rule($default_rule);
+  }
+
   my $actual_rules = $self->load_actual_rules();
-  my $config_rules = $self->load_config_rules();
   my $client_rules = $self->load_client_rules();
   my $expected_rules = [ @$client_rules, @$config_rules ];
 
@@ -52,14 +57,16 @@ sub run {
       $self->remove_rule($actual_rule);
     }
   }
-
   foreach my $expected_rule (@$expected_rules) {
     if ($self->is_not_in($expected_rule, $actual_rules)) {
       $self->add_rule($expected_rule);
     }
   }
 
-  $self->add_last_rule();
+  my $final_rules = $self->load_config_rules($self->{FINAL_RULES});
+  foreach my $rule (@$final_rules) {
+    $self->add_rule($rule);
+  }
 }
 
 sub is_not_in {
@@ -93,10 +100,10 @@ sub load_client_rules {
 }
 
 sub load_config_rules {
-  my ($self) = @_;
+  my ($self, $file) = @_;
   my @rules = ();
 
-  open RULES, $self->{RULES} or return ();
+  open RULES, $file or return \@rules;
   while (my $line = <RULES>) {
     push @rules, $self->parse_config_rule($line);
   }
@@ -146,7 +153,7 @@ sub is_equal {
   my ($self, $src, $dst) = @_;
 
   return undef if ($src->{x} ne $dst->{x});
- 
+
   my $found = 1;
 
   foreach (keys %$src) {
@@ -178,41 +185,9 @@ sub add_rule {
 sub remove_rule {
   my ($self, $rule) = @_;
 
-  my $last_rule = $self->get_last_rule();
-  return if $last_rule and $rule->{x} eq $last_rule->{x};
-
   my $command = sprintf("%s %s -x %s", $self->{CMD}, $self->{IFACE}, $rule->{x});
   print "exec: $command\n" if $self->{VERBOSE};
   `$command` if not $self->{NOEXEC};
-}
-
-sub get_last_rule {
-  my ($self) = @_;
-  my %rule;
-  if ($self->{LAST} =~ m/(\d+):(\d+)/) {
-    $rule{x} = $1;
-    $rule{bwboth} = $2;
-    $rule{l} = '';
-  } elsif ($self->{LAST} =~ m/(\d+)/) {
-    $rule{x} = $1;
-    $rule{priority} = 'discard';
-    $rule{l} = '';
-  }
-  return \%rule;
-}
-
-sub add_last_rule {
-  my ($self) = @_;
-
-  my $rule = $self->get_last_rule();
-  return if not $rule;
-
-  my @cmd_args = ();
-  foreach (keys %$rule) {
-    push @cmd_args, sprintf("-%s %s", $_, $rule->{$_});
-  }
-  my $command = sprintf("%s %s %s", $self->{CMD}, $self->{IFACE}, join ' ', sort @cmd_args);
-  `$command`;
 }
 
 1;
